@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"regexp"
+	"strings"
 )
 
 var contractAddressPattern = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)
@@ -13,7 +14,7 @@ func NewContractAddress(s string) (ContractAddress, error) {
 	if err := validateContractAddress(s); err != nil {
 		return "", err
 	}
-	return ContractAddress(s), nil
+	return ContractAddress(strings.ToLower(s)), nil
 }
 
 func validateContractAddress(s string) error {

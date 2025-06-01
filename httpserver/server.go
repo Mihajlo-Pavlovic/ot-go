@@ -1,9 +1,10 @@
-package server
+package httpserver
 
 import (
 	"encoding/json"
 	"fmt"
-	"http"
+	"net/http"
+	"ot-go/service"
 )
 
 // Get request JSON structure
@@ -11,12 +12,9 @@ type GetRequest struct {
 	ID              string `json:"id"`
 	ContentType     string `json:"contentType"`
 	IncludeMetadata bool   `json:"includeMetadata"`
-	HashFunctionId  string `json:"hashFunctionId"`
-	ParanetUAL      string `json:"paranetUAL"`
-	SubjectUAL      string `json:"subjectUAL"`
 }
 
-func InitServer(port string) {
+func InitServer(port string) error {
 	http.HandleFunc("/get", handleGet)
 	return http.ListenAndServe(port, nil)
 }
@@ -32,6 +30,11 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 	// Validate JSON structure
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if err := service.UALSvc.Validate(req.ID); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid UAL: %v", err), http.StatusBadRequest)
 		return
 	}
 
