@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"time"
 )
-
 
 type Client struct {
 	endpoint string
@@ -14,10 +14,16 @@ type Client struct {
 }
 
 func New(endpoint string, headers map[string]string) *Client {
+	transport := &http.Transport{
+		MaxIdleConns:        100,              // Total idle connections
+		MaxIdleConnsPerHost: 20,               // Per host
+		IdleConnTimeout:     90 * time.Second, // Keep alive time
+		DisableKeepAlives:   false,            // Enable keep-alive
+	}
 	return &Client{
 		endpoint: endpoint,
 		headers:  headers,
-		http:     &http.Client{},
+		http:     &http.Client{Transport: transport, Timeout: 30 * time.Second},
 	}
 }
 
